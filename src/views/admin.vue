@@ -46,6 +46,21 @@
       </el-col>
     </el-row>
     <el-row>
+      <el-col :span="4">
+        抽奖开始时间:
+      </el-col>
+      <el-col :span="12">
+        <el-time-select v-model="startTime"
+                        :picker-options="{
+    start: '08:00',
+    step: '00:15',
+    end: '18:30'
+  }"
+                        placeholder="选择时间">
+        </el-time-select>
+      </el-col>
+    </el-row>
+    <el-row>
       <el-col :offset="8">
         <el-button type="success"
                    plain
@@ -61,6 +76,7 @@
   width: 800px;
   height: 600px;
   margin: auto;
+  color: darkorange;
 }
 .el-row {
   margin-bottom: 20px;
@@ -86,6 +102,7 @@ export default {
   data() {
     return {
       basePath: this.GLOBAL.basePath,
+      startTime: "8:00",
       name: "中秋抽奖活动",
       first: "1",
       second: "2",
@@ -104,6 +121,7 @@ export default {
       params.append("second", that.second);
       params.append("third", that.third);
       params.append("join", that.join);
+      params.append("startTime", that.startTime);
       axios
         .post(that.basePath + "/draw/createActivity", params)
         .then(response => {

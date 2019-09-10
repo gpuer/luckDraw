@@ -5,28 +5,29 @@
       <div class="guajiang-area">
         <div class="jine">
           <canvas id="canvas"></canvas>
-          <div class="shuzi" style="display: none;">
+          <div class="shuzi" style="display: block;">
             <div class="font">刮刮乐</div>
-            <div class="num">一等奖</div>
+            <div class="num">{{name}}</div>
           </div>
         </div>
       </div>
     </div>
-    <el-button class="code" type="danger" plain @click="dialogVisible = true" v-if="!code" >点击获取抽奖码</el-button>
+    <el-button class="code" type="danger" plain @click="dialogVisible = true" v-if="!code">点击获取抽奖码</el-button>
     <div class="code" v-else>
       <span>抽奖码：{{code}}</span>
     </div>
-    <el-dialog title="提示" :visible.sync="dialogVisible" width="85%" :before-close="handleClose">
-      <el-input v-model="input" placeholder="请输入手机号"></el-input>
+    <el-dialog title="请输入手机号(不能修改)" :visible.sync="dialogVisible" width="85%" :before-close="handleClose">
+      <el-input v-model="input" placeholder="请输入手机号" :type="'number'" :maxlength="11"></el-input>
       <span slot="footer" class="dialog-footer">
-      <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="getCode">确 定</el-button>
-    </span>
+                      <el-button @click="dialogVisible = false">取 消</el-button>
+                      <el-button type="primary" @click="getCode">确 定</el-button>
+                    </span>
     </el-dialog>
   </div>
 </template>
 
 <script type='text/ecmascript-6'>
+  import axios from 'axios';
   import {
     mcall
   } from 'q';
@@ -36,7 +37,9 @@
         canDraw: false,
         dialogVisible: false,
         input: "",
-        code: ""
+        code: "",
+        userId: "",
+        name: "无抽奖码"
       }
     },
     methods: {
@@ -88,14 +91,16 @@
         var offsetY = canvas.parentNode.offsetTop;
         var mousedown = false;
         canvas.addEventListener("touchstart", function(e) {
-          if (_this.canDraw === false) {
-            alert("不鞥抽")
+          if (!_this.canDraw) {
             return;
           }
           e.preventDefault();
           mousedown = true;
         });
         canvas.addEventListener("touchmove", function(e) {
+          if (!_this.canDraw) {
+            return;
+          }
           e.preventDefault();
           if (mousedown) {
             if (e.changedTouches) {
@@ -109,6 +114,9 @@
           }
         });
         canvas.addEventListener("touchend", function(e) {
+          if (!_this.canDraw) {
+            return;
+          }
           e.preventDefault();
           mousedown = false;
           var num = 0;
@@ -120,14 +128,21 @@
           };
           if (num >= datas.data.length * 0.75) {
             // 达到面积要求时执行的内容    
+            canvas.style.display = "none";
             _this.openDrawPopup()
           }
         });
         canvas.addEventListener("mousedown", function(e) {
+          if (!_this.canDraw) {
+            return;
+          }
           e.preventDefault();
           mousedown = true;
         });
         canvas.addEventListener("mousemove", function(e) {
+          if (!_this.canDraw) {
+            return;
+          }
           e.preventDefault();
           if (mousedown) {
             if (e.changedTouches) {
@@ -141,6 +156,9 @@
           }
         });
         canvas.addEventListener("mouseup", function(e) {
+          if (!_this.canDraw) {
+            return;
+          }
           e.preventDefault();
           mousedown = false;
           var num = 0;
@@ -152,14 +170,19 @@
           };
           if (num >= datas.data.length * 0.75) {
             // 达到面积要求时执行的内容    
-            alert("刮到大奖啦！");   
+            canvas.style.display = "none";   
+            _this.openDrawPopup()
           }
         });
         var shuzi = document.getElementsByClassName("shuzi");
         shuzi[0].style.display = "block";
       },
       openDrawPopup() {
-        console.log("中奖了");
+        this.$message({
+          message: "你获得了：" + this.name + "!",
+          type: 'success',
+          center: true
+        });
       },
       handleClose(done) {
         this.$confirm('确认关闭？')
@@ -168,16 +191,51 @@
           })
           .catch(_ => {});
       },
-      getCode(){
-        setTimeout(() => {
-          this.code = "test"
-          this.dialogVisible = false;
-        }, 2000);
+      getCode() {
+        var input = this.input;
+        if (input.length !== 11 || isNaN(parseInt(input))) {
+          this.$message({
+            message: "请输入正确的手机号.",
+            center: true
+          });
+          this.input = ""
+          return;
+        }
+        axios.post(this.GLOBAL.basePath + '/user/register?mobile=' + this.input)
+          .then(res => {
+            return res.data.data.data
+          }).then(data => {
+            this.$ls.set("draw_data_code", data.openId);
+            this.$ls.set("draw_data_user_id", data.id);
+            this.code = data.openId;
+            this.userId = data.id;
+            this.getDrawResult().then(() => {
+              this.canDraw = true;
+              this.dialogVisible = false;
+            })
+          })
+      },
+      getDrawResult() {
+        if (this.code && this.userId) {
+          return axios.post(this.GLOBAL.basePath + '/draw/luckDraw?activityId=' + this.$route.query.id + '&userId=' + this.userId)
+            .then(res => {
+              return res.data.data
+            }).then(data => {
+              if (data.draw_code === 1) {
+                this.name = data.data.name;
+              } else {
+                this.initDraw()
+                this.name = data.data.name;
+              }
+            })
+        }
       }
     },
     mounted() {
-      this.canDraw = true;
-      this.initDraw()
+      // this.initDraw();
+      this.code = this.$ls.get("draw_data_code")
+      this.userId = this.$ls.get("draw_data_user_id")
+      this.getDrawResult()
     }
   }
 </script>
@@ -223,19 +281,19 @@
     /* background: #fff; */
     /* height: 100%; */
   }
-  .el-button.code{
+  .el-button.code {
     display: block;
     margin: 50px auto;
     text-align: center;
   }
-  .code{
+  .code {
     margin: 50px auto;
     text-align: center;
     color: red;
     font-weight: 900;
   }
-  .code span{
-    background: rgba(255,255,255,.8);
+  .code span {
+    background: rgba(255, 255, 255, .8);
     padding: 15px;
   }
 </style>

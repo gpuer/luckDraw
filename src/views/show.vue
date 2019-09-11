@@ -130,7 +130,7 @@
           .then(res => {
             return res.data.data
           }).then(list => {
-            var interval = setInterval(() => {
+            this.interval = setInterval(() => {
               var item = list.shift();
               if (this.popList.length > 5) {
                 this.popList.shift().close();
@@ -146,7 +146,9 @@
                   })
                 );
               } else {
-                clearInterval(interval);
+                console.log('remove');
+                
+                clearInterval(this.interval);
                 setTimeout(() => {
                   this.getData();
                 }, 2000)

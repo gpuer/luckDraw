@@ -15,10 +15,10 @@ export default {
       textarea: ""
     };
   },
-  created: function() {
+  mounted() {
     var that = this;
     axios
-      .get("http://localhost/user/getMobiles")
+      .get(this.GLOBAL.basePath + "/user/getMobiles")
       .then(response => {
         var obj = response.data.data;
         for (var i in obj) {

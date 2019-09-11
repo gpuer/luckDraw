@@ -1,5 +1,5 @@
 <script>
-const basePath = "http://47.94.237.177";
+const basePath = "http://localhost";
 export default {
   basePath,
   successMsg(that, title) {

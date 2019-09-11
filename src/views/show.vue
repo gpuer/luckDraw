@@ -5,7 +5,7 @@
       <template>
                   <el-carousel :interval="4000"
                   :indicator-position="'none'"
-                               height="700px">
+                               height="500px">
                     <el-carousel-item class="class_card" v-for="item in 5"
                                       :key="item">
                         <div class="jp_frame">
@@ -55,7 +55,7 @@
     background-repeat: no-repeat;
   }
   .text {
-    width: 1000px;
+    width: 500px;
     font-size: 40px;
     position: absolute;
     text-align: left;
@@ -111,7 +111,7 @@
       var that = this;
       var id = this.$route.query.id;
       that.$nextTick(() => {
-        that.qrcode(that.basePath + "/draw?id=" + id);
+        that.qrcode(that.basePath + "/index.html#/show?id=" + id);
       });
       window.setInterval(() => {
         setTimeout(fun, 0);

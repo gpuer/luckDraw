@@ -1,6 +1,8 @@
 <template>
   <div class="show">
-    <div class="qrcode" id="qrcode" ref="qrcode">扫我抽奖！</div>
+    <div class="qrcode"
+         id="qrcode"
+         ref="qrcode">扫我抽奖！</div>
     <div class="text">
       <template>
                   <el-carousel :interval="4000"
@@ -164,8 +166,16 @@
           height: 200, // 设置高度，单位像素
           text: url // 设置二维码内容或跳转地址
         });
-      }
     },
-    name: "App"
-  };
+    qrcode(url) {
+      /* eslint-disable */
+      let qrcode = new QRCode("qrcode", {
+        width: 200, // 设置宽度，单位像素
+        height: 200, // 设置高度，单位像素
+        text: url // 设置二维码内容或跳转地址
+      });
+    }
+  },
+  name: "App"
+};
 </script>

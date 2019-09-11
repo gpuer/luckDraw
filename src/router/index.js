@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import show from '@/views/show'
 import draw from '@/views/draw'
 import admin from '@/views/admin'
+import mobile from '@/views/mobile'
 Vue.use(Router)
 export default new Router({
   routes: [
@@ -19,6 +20,11 @@ export default new Router({
       path: "/draw",
       name: "draw",
       component: draw
+    },
+    {
+      path: "/mobile",
+      name: "mobile",
+      component: mobile
     },
   ]
 })

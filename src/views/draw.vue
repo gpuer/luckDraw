@@ -39,7 +39,7 @@
         input: "",
         code: "",
         userId: "",
-        name: "无抽奖码"
+        name: "等待开始"
       }
     },
     methods: {
@@ -219,8 +219,15 @@
         if (this.code && this.userId) {
           return axios.post(this.GLOBAL.basePath + '/draw/luckDraw?activityId=' + this.$route.query.id + '&userId=' + this.userId)
             .then(res => {
+              if(res.data.code !== 200){
+                  this.$message({
+                    message: res.data.message
+                  })
+              }
+              
               return res.data.data
             }).then(data => {
+              if(!data) return
               if (data.draw_code === 1) {
                 this.name = data.data.name;
               } else {
